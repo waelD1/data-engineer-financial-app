@@ -1,0 +1,6 @@
+numpy 
+finnhub-python 
+python-dotenv 
+kafka-python 
+cassandra-driver
+pyspark
