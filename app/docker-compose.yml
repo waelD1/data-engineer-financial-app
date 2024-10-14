@@ -25,7 +25,6 @@ services:
     hostname: spark-worker
     build:
       context: jobs
-      # Explicitly specify Dockerfile for clarity
       dockerfile: Dockerfile 
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
