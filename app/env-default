@@ -1,0 +1,3 @@
+FINHUB_API_PWD=your_api_key
+KAFKA_BROKER=kafka:9092
+TOPIC_NAME=financial_data
