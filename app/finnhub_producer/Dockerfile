@@ -8,7 +8,6 @@ WORKDIR /app
 COPY ./finnhub_streaming_producer.py /app/
 COPY ./requirements.txt /app/
 COPY ./schema /app/schema
-COPY ./schema /app/schema
 
 
 RUN apt-get clean && \

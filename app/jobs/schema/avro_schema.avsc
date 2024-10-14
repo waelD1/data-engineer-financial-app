@@ -1,0 +1,58 @@
+{
+    "type": "record",
+    "name": "WebSocketResponse",
+    "fields": [
+      {
+        "name": "type",
+        "type": "string",
+        "doc": "Message type."
+      },
+      {
+        "name": "data",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "TradeInformation",
+            "fields": [
+              {
+                "name": "p",
+                "type": "double",
+                "doc": "Price of the stock traded"
+              },
+              {
+                "name": "s",
+                "type": "string",
+                "doc": "Symbol of the stock"
+              },
+              {
+                "name": "t",
+                "type": "long",
+                "doc": "UNIX milliseconds timestamp at which the stock was traded."
+              },
+              {
+                "name": "v",
+                "type": "double",
+                "doc": "Volume of the trade"
+              },
+              {
+                "name" : "c",
+                "type":[
+                    {
+                        "type":"array",
+                        "items":["null","string"],
+                        "default":[]
+                    },
+                    "null"
+                ],
+                "doc" : "List of trade conditions"
+            
+              }
+            ]
+          }
+        },
+        "doc": "Information about trades"
+      }
+    ]
+  }
+  

@@ -5,12 +5,18 @@ services:
     container_name: spark-master
     hostname: spark-master
     build:
-      context: .
-      dockerfile: Dockerfile.spark
+      context: jobs
     command: bin/spark-class org.apache.spark.deploy.master.Master
     ports:
       - "9090:8080"
       - "7077:7077"
+    volumes:
+      - ./jobs:/opt/bitnami/spark/scripts
+      - ./jobs/schema:/opt/bitnami/spark/scripts/schema
+    env_file:
+      - .env
+    depends_on:
+      - cassandra
     networks:
       - financial_information
 
@@ -18,16 +24,22 @@ services:
     container_name: spark-worker
     hostname: spark-worker
     build:
-      context: .
-      dockerfile: Dockerfile.spark
+      context: jobs
+      dockerfile: Dockerfile # Explicitly specify Dockerfile for clarity
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
+      - cassandra
     environment:
       SPARK_MODE: worker
-      SPARK_WORKER_CORES: 2
-      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_CORES: 4
+      SPARK_WORKER_MEMORY: 2g
       SPARK_MASTER_URL: spark://spark-master:7077
+    volumes:
+      - ./jobs:/opt/bitnami/spark/scripts
+      - ./jobs/schema:/opt/bitnami/spark/scripts/schema
+    env_file:
+      - .env
     networks:
       - financial_information
 
@@ -68,6 +80,41 @@ services:
       - kafka
     networks:
       - financial_information
-      
+
+
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_USER=cassandra
+      - CASSANDRA_PASSWORD=cassandra 
+    networks:
+      - financial_information
+
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"  # Grafana UI port
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning  
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin  
+    depends_on:
+      - cassandra
+    networks:
+      - financial_information
+
+volumes:
+  grafana_data:
+
+# volumes:
+#   cassandra-data:
+
 networks:
   financial_information:

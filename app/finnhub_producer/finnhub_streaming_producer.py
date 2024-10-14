@@ -8,7 +8,10 @@ import avro.schema
 import json
 from dotenv import load_dotenv
 import time
+import logging
+
 load_dotenv()
+logging.basicConfig(level=logging.INFO) 
 
 class FinnhubProducerStreaming:
 
@@ -21,10 +24,6 @@ class FinnhubProducerStreaming:
         self.avro_schema = self.load_avro_schema()
 
         self.producer = self.load_producer()
-
-        print("FINHUB_API_PWD:", self.FINHUB_API_PWD)  # Debugging statement
-        print("KAFKA_BROKER:", self.KAFKA_BROKER)      # Debugging statement
-        print("TOPIC_NAME:", self.TOPIC_NAME)          # Debugging statement
 
         websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp(
@@ -43,7 +42,13 @@ class FinnhubProducerStreaming:
     # Setting up a Kafka connection
     def load_producer(self):
         try : 
-            producer = KafkaProducer(bootstrap_servers=self.KAFKA_BROKER)
+            producer = KafkaProducer(
+                bootstrap_servers=self.KAFKA_BROKER,
+                retries=5, 
+                acks='all', 
+                linger_ms=10,  
+                request_timeout_ms=30000  
+                                     )
             return producer
         except kafka_errors.NoBrokersAvailable:
             print("No Kafka brokers available. Make sure Kafka is running and the broker address is correct.")
@@ -63,29 +68,64 @@ class FinnhubProducerStreaming:
         writer.write(data, encoder)
         return bytes_writer.getvalue()
 
+
+
     def on_message(self, ws, message):
-        message = json.loads(message)
-        avro_message = self.avro_encode(
-            {
-                'data': message['data'],
-                'type': message['type']
-            },
-            self.avro_schema
-        )
-        self.producer.send(self.TOPIC_NAME, avro_message)
+        try:
+            message = json.loads(message)
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to decode JSON message: {e}")
+            return
+
+        # Handle ping messages
+        if message.get('type') == 'ping':
+            logging.info("Received ping message")
+            return
+
+        # Handle data messages
+        if 'data' in message:
+            try:
+                avro_message = self.avro_encode(
+                    {
+                        'data': message['data'],
+                        'type': message['type']
+                    },
+                    self.avro_schema
+                )
+                self.producer.send(self.TOPIC_NAME, avro_message)
+                self.producer.flush()
+            except kafka_errors.KafkaError as e:
+                logging.error(f"Failed to send message to Kafka: {e}")
+
 
     def on_error(self, ws, error):
-        print(error)
+        print(f"WebSocket error: {error}")
+        self.reconnect()
 
-    def on_close(self, ws):
-        print("### closed ###")
+    def on_close(self, ws, close_status_code, close_msg):
+        print(f"WebSocket closed with code: {close_status_code}, message: {close_msg}")
+        self.reconnect()
+
+    def reconnect(self):
+         # Retry up to 5 times
+        for _ in range(5): 
+            # Delay before attempting reconnection
+            time.sleep(5)  
+            try:
+                self.ws.run_forever()
+                # If successful, exit the loop
+                break  
+            except Exception as e:
+                print(f"Reconnection attempt failed: {e}")
+
 
     def on_open(self, ws):
         """
-        Stock ticker I want to analyze
+        Stock tickers I want to analyze
         """
-        time.sleep(5)
+        time.sleep(1)
         ws.send('{"type":"subscribe","symbol":"AAPL"}')
+        ws.send('{"type":"subscribe","symbol":"OANDA:XAU_USD"}')
         ws.send('{"type":"subscribe","symbol":"AMZN"}')
         ws.send('{"type":"subscribe","symbol":"BINANCE:BTCUSDT"}')
         ws.send('{"type":"subscribe","symbol":"IC MARKETS:1"}')
