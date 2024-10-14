@@ -25,7 +25,8 @@ services:
     hostname: spark-worker
     build:
       context: jobs
-      dockerfile: Dockerfile # Explicitly specify Dockerfile for clarity
+      # Explicitly specify Dockerfile for clarity
+      dockerfile: Dockerfile 
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
@@ -98,7 +99,8 @@ services:
     image: grafana/grafana-oss:latest
     container_name: grafana
     ports:
-      - "3001:3000"  # Grafana UI port
+    # Grafana UI port
+      - "3001:3000" 
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning  
