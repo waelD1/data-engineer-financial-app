@@ -32,8 +32,11 @@ The **Finnhub Real-time Data Pipeline** is a fully containerized solution for st
 ## 📊 Real-time Dashboard 
 
 Here is some images of the Dashboard :
-![](images/grafana_usd_to_gold.png)
-![](images/grafana_usd_to_gold.png)
+![](app/images/grafana_usd_to_gold.png)
+![](app/images/usd_to_gold.png)
+![](app/images/grafana_btc_to_tether.png)
+![](app/images/btc_to_tether_graph.png)
+
 
 ---
 
@@ -64,10 +67,11 @@ Here is some images of the Dashboard :
     ```
 
 ### 5. Access the Live Dashboard
-- Open your browser and navigate to [localhost:3003](http://localhost:3001).
+- Open your browser and navigate to [localhost:3001](http://localhost:3001).
 - Use `admin` as the username and password.
 - Install the cassandra plugin in the app
 - Connect the dashboard to the Cassandra source 
+- Visualize the result
 
 
 ---
@@ -82,12 +86,3 @@ Here is some images of the Dashboard :
 - **Visualization**: Grafana (with Cassandra plugin)
 - **Containerization**: Docker, Docker Compose
 
----
-
-## ⚖️ License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-By following this guide, you'll be up and running with a real-time trading data pipeline and dashboard in no time. Happy coding and data streaming! 🌟
