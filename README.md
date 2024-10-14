@@ -6,8 +6,6 @@ The **Finnhub Real-time Data Pipeline** is a fully containerized solution for st
 
 ## 📐 Architecture
 
-![Architecture Diagram](images/arch_diagram.png)
-
 ### Key Components:
 - **Data Source (Finnhub.io)**: 
   - Streams real-time trade data (stocks, forex, and crypto) through websockets.
