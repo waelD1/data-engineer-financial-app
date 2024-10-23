@@ -5,6 +5,9 @@ The **Finnhub Real-time Data Pipeline** is a fully containerized solution for st
 ---
 
 ## 📐 Architecture
+Here is the schema of the app's pipeline : 
+
+![](app/images/schema_png.png)
 
 ### Key Components:
 - **Data Source (Finnhub.io)**: 
